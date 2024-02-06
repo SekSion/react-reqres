@@ -1,14 +1,23 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { loginUser, registerUser } from "../../services/userSession";
+import { ILogin } from "../../models/ILogin";
+import { IRegister } from "../../models/IRegister";
+import { useAuth } from "../../services/Contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const SignInUp = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [repeatPassword, setRepeatPassword] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [repeatPasswordError, setRepeatPasswordError] = useState("");
-  const [isSignUpMode, setIsSignUpMode] = useState(true);
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [repeatPassword, setRepeatPassword] = useState<string>("");
+  const [emailError, setEmailError] = useState<string>("");
+  const [passwordError, setPasswordError] = useState<string>("");
+  const [repeatPasswordError, setRepeatPasswordError] = useState<string>("");
+  const [isSignUpMode, setIsSignUpMode] = useState<boolean>(false);
+  const [isButtonEnabled, setIsButtonEnabled] = useState<boolean>(false);
 
+  const { loginUserStore } = useAuth();
+  const navigate = useNavigate();
   useEffect(() => {
     validateEmail();
   }, [email]);
@@ -21,6 +30,16 @@ const SignInUp = () => {
     validateRepeatPassword();
   }, [repeatPassword, isSignUpMode]); // Also depends on isSignUpMode
 
+  useEffect(() => {
+    // Check if all fields are filled and valid
+    const isEmailValid = email !== "" && !emailError;
+    const isPasswordValid = password !== "" && !passwordError;
+    const isRepeatPasswordValid = !isSignUpMode || (repeatPassword !== "" && !repeatPasswordError);
+
+    // Enable or disable button based on form validity
+    setIsButtonEnabled(isEmailValid && isPasswordValid && isRepeatPasswordValid);
+  }, [email, password, repeatPassword, emailError, passwordError, repeatPasswordError, isSignUpMode]);
+
   const validateEmail = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (email !== "" && !emailRegex.test(email)) {
@@ -31,9 +50,8 @@ const SignInUp = () => {
   };
 
   const validatePassword = () => {
-    const passwordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/;
-    if (password !== "" && !passwordRegex.test(password)) {
-      setPasswordError("Password must be at least 8 characters long and contain at least one number and one special character");
+    if (password == "") {
+      setPasswordError("Password must be filled");
     } else {
       setPasswordError("");
     }
@@ -49,20 +67,45 @@ const SignInUp = () => {
 
   const toggleMode = () => {
     setIsSignUpMode(!isSignUpMode);
-    // Clear repeat password field and error when toggling mode
     setRepeatPassword("");
     setRepeatPasswordError("");
   };
 
   const signUp = () => {
-    // Implement sign-up logic
+    const register: IRegister = {
+      email,
+      password,
+    };
+    registerUser(register).then(
+      (res) => {
+        toast.success("id:" + res.id + ", " + res.token);
+        toggleMode();
+      },
+      (err) => {
+        console.log(err);
+        toast.error(err);
+      }
+    );
   };
 
   const signIn = () => {
-    // Implement sign-in logic
+    const login: ILogin = {
+      email,
+      password,
+    };
+    loginUser(login).then(
+      (res) => {
+        console.log("RESTET", res);
+        loginUserStore(login.email, res.token);
+        navigate("/dashboard");
+        toast.success(res.token);
+      },
+      (err) => {
+        console.log(err);
+        toast.error(err);
+      }
+    );
   };
-
-  const isFormValid = !emailError && !passwordError && !repeatPasswordError;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-800">
@@ -124,12 +167,12 @@ const SignInUp = () => {
         <button
           type="button"
           className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 disabled:opacity-50 disabled:pointer"
-          disabled={!isFormValid}
+          disabled={!isButtonEnabled} // Disable button when form is invalid
           onClick={isSignUpMode ? signUp : signIn}
         >
           {isSignUpMode ? "Sign Up" : "Sign In"}
         </button>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
+        <p className="text-black dark:text-white mt-2">
           {isSignUpMode ? "Already have an account?" : "Don't have an account?"}
           <span className="text-blue-500 cursor-pointer hover:underline" onClick={toggleMode}>
             {isSignUpMode ? " Sign In" : " Sign Up"}
