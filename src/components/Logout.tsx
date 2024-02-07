@@ -1,6 +1,14 @@
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../services/Contexts/AuthContext";
+import toast from "react-hot-toast";
+
 const Logout = () => {
+  const { logoutUser } = useAuth();
+  const navigate = useNavigate();
   const logout = () => {
-    window.location.href = "/";
+    logoutUser();
+    toast.success("logged out");
+    navigate("/");
   };
 
   return (

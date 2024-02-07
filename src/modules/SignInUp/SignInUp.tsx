@@ -5,6 +5,8 @@ import { ILogin } from "../../models/ILogin";
 import { IRegister } from "../../models/IRegister";
 import { useAuth } from "../../services/Contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { listUsers } from "../../services/users";
+import { IUsers } from "../../models/IUsers";
 
 const SignInUp = () => {
   const [email, setEmail] = useState<string>("");
@@ -13,10 +15,17 @@ const SignInUp = () => {
   const [emailError, setEmailError] = useState<string>("");
   const [passwordError, setPasswordError] = useState<string>("");
   const [repeatPasswordError, setRepeatPasswordError] = useState<string>("");
-  const [isSignUpMode, setIsSignUpMode] = useState<boolean>(false);
+  const [isSignUpMode, setIsSignUpMode] = useState<boolean>(true);
   const [isButtonEnabled, setIsButtonEnabled] = useState<boolean>(false);
 
-  const { loginUserStore } = useAuth();
+  const { loginUserStore, isAuthenticated, registerUserStore } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated()) {
+      navigate("/dashboard");
+    }
+  }, []);
+
   const navigate = useNavigate();
   useEffect(() => {
     validateEmail();
@@ -28,15 +37,13 @@ const SignInUp = () => {
 
   useEffect(() => {
     validateRepeatPassword();
-  }, [repeatPassword, isSignUpMode]); // Also depends on isSignUpMode
+  }, [repeatPassword, isSignUpMode]);
 
   useEffect(() => {
-    // Check if all fields are filled and valid
     const isEmailValid = email !== "" && !emailError;
     const isPasswordValid = password !== "" && !passwordError;
     const isRepeatPasswordValid = !isSignUpMode || (repeatPassword !== "" && !repeatPasswordError);
 
-    // Enable or disable button based on form validity
     setIsButtonEnabled(isEmailValid && isPasswordValid && isRepeatPasswordValid);
   }, [email, password, repeatPassword, emailError, passwordError, repeatPasswordError, isSignUpMode]);
 
@@ -71,14 +78,15 @@ const SignInUp = () => {
     setRepeatPasswordError("");
   };
 
-  const signUp = () => {
+  const signUp = async () => {
     const register: IRegister = {
       email,
       password,
     };
-    registerUser(register).then(
+    await registerUser(register).then(
       (res) => {
         toast.success("id:" + res.id + ", " + res.token);
+        registerUserStore(res.id, res.token);
         toggleMode();
       },
       (err) => {
@@ -88,23 +96,34 @@ const SignInUp = () => {
     );
   };
 
-  const signIn = () => {
+  const signIn = async () => {
     const login: ILogin = {
       email,
       password,
     };
-    loginUser(login).then(
-      (res) => {
-        console.log("RESTET", res);
-        loginUserStore(login.email, res.token);
-        navigate("/dashboard");
-        toast.success(res.token);
-      },
-      (err) => {
-        console.log(err);
-        toast.error(err);
+
+    try {
+      const resLogin = await loginUser(login);
+
+      const firstPageRes = await listUsers();
+      let user = firstPageRes.data.find((x: IUsers) => x.email === login.email);
+
+      if (!user && firstPageRes.total_pages > 1) {
+        const secondPageRes = await listUsers(2);
+        user = secondPageRes.data.find((x: IUsers) => x.email === login.email);
       }
-    );
+      if (user) {
+        loginUserStore(login.email, resLogin.token, user.first_name);
+        navigate("/dashboard");
+        toast.success("Hello: " + user.first_name + " " + user.last_name);
+      } else {
+        console.log("User not found");
+        toast.error("User not found");
+      }
+    } catch (err) {
+      console.log(err);
+      toast.error(err as string);
+    }
   };
 
   return (
