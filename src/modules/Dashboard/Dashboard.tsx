@@ -1,12 +1,10 @@
-import { useEffect, useState } from "react";
-import { useAuth } from "../../services/Contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { listUsers, updateUser } from "../../services/users";
-import { IUsers } from "../../models/IUsers";
-import Modal from "../../components/Modal";
-import * as Create from "./Create/Create";
-import * as Edit from "./Edit/Edit";
-import * as Delete from "./Delete/Delete";
+import { useEffect, useState } from 'react';
+import { useAuth } from '../../services/Contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { listUsers, updateUser } from '../../services/users';
+import { IUsers } from '../../models/IUsers';
+import DeleteModal from './Delete/Delete';
+import CreateEditModal from './CreateEdit/CreateEdit';
 
 function Dashboard() {
   const { isAuthenticated } = useAuth();
@@ -16,14 +14,18 @@ function Dashboard() {
   const [totalPages, setTotalPages] = useState(1);
   const [selectedUser, setSelectedUser] = useState<IUsers | null>(null); // State to track the selected user
   const [showModal, setShowModal] = useState(false);
-  const [modalAction, setModalAction] = useState<"create" | "edit" | "delete">("create"); // State to track modal action
+  const [modalAction, setModalAction] = useState<'create' | 'edit' | 'delete'>('create'); // State to track modal action
 
   useEffect(() => {
     if (!isAuthenticated()) {
-      navigate("/");
+      navigate('/');
     }
     getUsers(currentPage);
   }, []);
+
+  useEffect(() => {
+    setSelectedUser(null);
+  }, [users]);
 
   useEffect(() => {
     getUsers(currentPage);
@@ -36,7 +38,7 @@ function Dashboard() {
       setTotalPages(res.total_pages);
       setSelectedUser(null);
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.error('Error fetching users:', error);
     }
   };
 
@@ -54,38 +56,33 @@ function Dashboard() {
 
   const handleCreateBtn = () => {
     // Handle edit action here
-    setModalAction("create");
+    setModalAction('create');
     setShowModal(true);
   };
 
   const handleEditBtn = () => {
     // Handle edit action here
-    setModalAction("edit");
+    setModalAction('edit');
     setShowModal(true);
   };
 
   const handleDeleteBtn = () => {
     // Handle delete action here
-    setModalAction("delete");
+    setModalAction('delete');
     setShowModal(true);
-  };
-
-  const handleCloseModal = () => {
-    // Logic to handle closing the modal
-    setShowModal(false);
   };
 
   const handleSaveModal = (u: IUsers) => {
     switch (modalAction) {
-      case "create":
-      case "edit":
+      case 'create':
+      case 'edit':
         if (u && u.id) {
           updateUser(u.id, u).then((res) => {
             setUsers((prevUsers) => prevUsers.map((user) => (user.id === res.id ? (res as IUsers) : user)));
           });
         }
         break;
-      case "delete":
+      case 'delete':
     }
   };
   return (
@@ -97,9 +94,7 @@ function Dashboard() {
           </button>
 
           <button
-            className={`p-2 ml-4 min-w-[90px] bg-blue-600 dark:bg-blue-gray-900 text-white rounded-md ${
-              selectedUser ? "" : "opacity-50 pointer-events-none"
-            }`}
+            className={`p-2 ml-4 min-w-[90px] bg-blue-600 dark:bg-blue-gray-900 text-white rounded-md ${selectedUser ? '' : 'opacity-50 pointer-events-none'}`}
             onClick={handleEditBtn}
             disabled={!selectedUser}
           >
@@ -107,9 +102,7 @@ function Dashboard() {
           </button>
 
           <button
-            className={`p-2 ml-4 min-w-[90px] bg-blue-600 dark:bg-blue-gray-900 text-white rounded-md ${
-              selectedUser ? "" : "opacity-50 pointer-events-none"
-            }`}
+            className={`p-2 ml-4 min-w-[90px] bg-blue-600 dark:bg-blue-gray-900 text-white rounded-md ${selectedUser ? '' : 'opacity-50 pointer-events-none'}`}
             onClick={handleDeleteBtn}
             disabled={!selectedUser}
           >
@@ -141,11 +134,11 @@ function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {users.map((user, index) => (
+                    {users.map((user) => (
                       <tr
                         key={user.id}
                         className={`hover:bg-gray-500 cursor-pointer border-b transition duration-300 ease-in-out hover:bg-neutral-100 border-black dark:border-white dark:hover:bg-neutral-600 ${
-                          selectedUser?.id === user.id ? "bg-blue-200" : ""
+                          selectedUser?.id === user.id ? 'bg-blue-200' : ''
                         }`}
                         onClick={() => handleUserSelect(user)}
                       >
@@ -170,7 +163,7 @@ function Dashboard() {
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 className={`relative block rounded bg-transparent px-3 py-1.5 text-sm text-neutral-600 transition-all duration-500 hover:bg-neutral-100 dark:text-white dark:hover:text-blue-600  hover:text-blue-600 ${
-                  currentPage === 1 ? "opacity-50 pointer-events-none" : ""
+                  currentPage === 1 ? 'opacity-50 pointer-events-none' : ''
                 }`}
                 disabled={currentPage === 1}
               >
@@ -182,7 +175,7 @@ function Dashboard() {
                 <button
                   onClick={() => handlePageChange(page + 1)}
                   className={`relative block font-bold rounded bg-transparent px-3 py-1.5 text-sm text-neutral-600 transition-all duration-500 hover:bg-neutral-100 dark:text-white dark:hover:text-blue-600 hover:text-blue-600 ${
-                    currentPage === page + 1 ? "font-bold text-blue-600 dark:text-blue-600" : ""
+                    currentPage === page + 1 ? 'font-bold text-blue-700 dark:text-blue-700' : ''
                   }`}
                 >
                   {page + 1}
@@ -193,7 +186,7 @@ function Dashboard() {
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 className={`relative block rounded bg-transparent px-3 py-1.5 text-sm text-neutral-600 transition-all duration-500 hover:bg-neutral-100 dark:text-white dark:hover:text-blue-600 hover:text-blue-600 ${
-                  currentPage === totalPages ? "opacity-50 pointer-events-none" : ""
+                  currentPage === totalPages ? 'opacity-50 pointer-events-none' : ''
                 }`}
                 disabled={currentPage === totalPages}
               >
@@ -202,44 +195,11 @@ function Dashboard() {
             </li>
           </ul>
         </nav>
-        <Modal
-          showModal={showModal}
-          setShowModal={setShowModal}
-          modalHeaderContent={
-            modalAction == "create" ? (
-              <Create.Header onClose={handleCloseModal}></Create.Header>
-            ) : modalAction == "edit" ? (
-              <Edit.Header user={selectedUser} onClose={handleCloseModal}></Edit.Header>
-            ) : modalAction == "delete" ? (
-              <Delete.Header onClose={handleCloseModal}></Delete.Header>
-            ) : (
-              <></>
-            )
-          }
-          modalBodyContent={
-            modalAction == "create" ? (
-              <Create.Body></Create.Body>
-            ) : modalAction == "edit" ? (
-              <Edit.Body user={selectedUser}></Edit.Body>
-            ) : modalAction == "delete" ? (
-              <Delete.Body></Delete.Body>
-            ) : (
-              <></>
-            )
-          }
-          modalFooterContent={
-            modalAction == "create" ? (
-              <Create.Footer onClose={handleCloseModal} onSave={handleSaveModal}></Create.Footer>
-            ) : modalAction == "edit" ? (
-              <Edit.Footer onClose={handleCloseModal} saveUser={handleSaveModal}></Edit.Footer>
-            ) : modalAction == "delete" ? (
-              <Delete.Footer onClose={handleCloseModal}></Delete.Footer>
-            ) : (
-              <></>
-            )
-          }
-        />
       </div>
+      {(modalAction == 'create' || modalAction == 'edit') && (
+        <CreateEditModal setShowModal={setShowModal} initialUser={selectedUser} showModal={showModal} listUsers={users} setUsers={setUsers} />
+      )}
+      {modalAction == 'delete' && <DeleteModal setShowModal={setShowModal} showModal={showModal} user={selectedUser} listUsers={users} setUsers={setUsers} />}
     </>
   );
 }

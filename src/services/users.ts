@@ -5,7 +5,7 @@ export const listUsers = (page?: number): Promise<IListResponse> => {
     const queryParams = page ? `?page=${page}` : '';
     return http.get<IListResponse>(`/users${queryParams}`)
       .then(response => response.data)
-      .catch(error => {
+      .catch(() => {
         throw new Error('Failed to list users');
       });
   };
@@ -13,7 +13,7 @@ export const listUsers = (page?: number): Promise<IListResponse> => {
 export const createUser = (user: IUsers): Promise<IUserResponse> => {
   return http.post<IUserResponse>('/users', user)
     .then(response => response.data)
-    .catch(error => {
+    .catch(() => {
       throw new Error('Failed to create user');
     });
 };
@@ -21,7 +21,7 @@ export const createUser = (user: IUsers): Promise<IUserResponse> => {
 export const updateUser = (id: number, user: IUsers): Promise<IUserResponse> => {
   return http.put<IUserResponse>(`/users/${id}`, user)
     .then(response => response.data)
-    .catch(error => {
+    .catch(() => {
       throw new Error('Failed to update user');
     });
 };
@@ -29,7 +29,7 @@ export const updateUser = (id: number, user: IUsers): Promise<IUserResponse> => 
 export const deleteUser = (id: number): Promise<void> => {
   return http.delete(`/users/${id}`)
     .then(() => {})
-    .catch(error => {
+    .catch(() => {
       throw new Error('Failed to delete user');
     });
 };

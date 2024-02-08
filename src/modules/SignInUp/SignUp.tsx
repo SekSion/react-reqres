@@ -1,19 +1,15 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { loginUser, registerUser } from '../../services/userSession';
-import { ILogin } from '../../models/ILogin';
+import { registerUser } from '../../services/userSession';
 import { IRegister } from '../../models/IRegister';
 import { useAuth } from '../../services/Contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { TEInput } from 'tw-elements-react';
-import { IUsers } from '../../models/IUsers';
-import { listUsers } from '../../services/users';
 
-const SignInUp = () => {
+const SignUp = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [repeatPassword, setRepeatPassword] = useState<string>('');
-  const [isSignUpMode, setIsSignUpMode] = useState<boolean>(true);
   const [isButtonEnabled, setIsButtonEnabled] = useState<boolean>(false);
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({
     email: false,
@@ -22,32 +18,15 @@ const SignInUp = () => {
   });
   const [emailError, setEmailError] = useState<string>('');
 
-  const { loginUserStore, isAuthenticated, registerUserStore } = useAuth();
-
-  useEffect(() => {
-    if (isAuthenticated()) {
-      navigate('/dashboard');
-    }
-  }, []);
-
+  const { registerUserStore } = useAuth();
   const navigate = useNavigate();
-
   useEffect(() => {
     const isEmailValid = email !== '' && emailError === '';
     const isPasswordValid = password !== '';
-    const isRepeatPasswordValid = !isSignUpMode || repeatPassword !== '';
+    const isRepeatPasswordValid = repeatPassword !== '';
 
     setIsButtonEnabled(isEmailValid && isPasswordValid && isRepeatPasswordValid);
-  }, [email, password, repeatPassword, isSignUpMode, emailError]);
-
-  const toggleMode = () => {
-    setIsSignUpMode(!isSignUpMode);
-    setRepeatPassword('');
-    setTouchedFields({
-      ...touchedFields,
-      repeatPassword: false,
-    });
-  };
+  }, [email, password, repeatPassword, emailError]);
 
   const signUp = async () => {
     const register: IRegister = {
@@ -58,7 +37,7 @@ const SignInUp = () => {
       (res) => {
         toast.success('id:' + res.id + ', ' + res.token);
         registerUserStore(res.id, res.token);
-        toggleMode();
+        navigateToSignIn();
       },
       (err) => {
         console.log(err);
@@ -67,33 +46,8 @@ const SignInUp = () => {
     );
   };
 
-  const signIn = async () => {
-    const login: ILogin = {
-      email,
-      password,
-    };
-
-    try {
-      const resLogin = await loginUser(login);
-      const firstPageRes = await listUsers();
-      let user = firstPageRes.data.find((x: IUsers) => x.email === login.email);
-
-      if (!user && firstPageRes.total_pages > 1) {
-        const secondPageRes = await listUsers(2);
-        user = secondPageRes.data.find((x: IUsers) => x.email === login.email);
-      }
-      if (user) {
-        loginUserStore(login.email, resLogin.token, user.first_name);
-        navigate('/dashboard');
-        toast.success('Hello: ' + user.first_name + ' ' + user.last_name);
-      } else {
-        console.log('User not found');
-        toast.error('User not found');
-      }
-    } catch (err) {
-      console.log(err);
-      toast.error(err as string);
-    }
+  const navigateToSignIn = () => {
+    navigate('/sign-in');
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -119,7 +73,7 @@ const SignInUp = () => {
   return (
     <div className="min-h-[calc(100vh-60px)] flex items-center justify-center bg-gray-100 dark:bg-gray-800">
       <div className="bg-white dark:bg-gray-700 p-8 rounded shadow-md w-96">
-        <h2 className="text-2xl font-semibold mb-4 dark:text-white">{isSignUpMode ? 'Sign Up' : 'Sign In'}</h2>
+        <h2 className="text-2xl font-semibold mb-4 dark:text-white">Sign Up</h2>
         <div className="mb-8 text-black dark:text-white">
           <TEInput type="email" id="email" label="Email" value={email} onChange={(e) => handleInputChange('email', e.target.value)}>
             {(touchedFields.email && !email && <div className="absolute w-full text-sm text-red-500 dark:text-red-500">Email is required</div>) ||
@@ -131,33 +85,31 @@ const SignInUp = () => {
             {touchedFields.password && !password && <div className="absolute w-full text-sm text-red-500 dark:text-red-500">Password is required</div>}
           </TEInput>
         </div>
-        {isSignUpMode && (
-          <div className="mb-8 text-black dark:text-white">
-            <TEInput
-              type="password"
-              id="repeatPassword"
-              label="Repeat Password"
-              value={repeatPassword}
-              onChange={(e) => handleInputChange('repeatPassword', e.target.value)}
-            >
-              {touchedFields.repeatPassword && !repeatPassword && (
-                <div className="absolute w-full text-sm text-red-500 dark:text-red-500">Repeat Password is required</div>
-              )}
-            </TEInput>
-          </div>
-        )}
+        <div className="mb-8 text-black dark:text-white">
+          <TEInput
+            type="password"
+            id="repeatPassword"
+            label="Repeat Password"
+            value={repeatPassword}
+            onChange={(e) => handleInputChange('repeatPassword', e.target.value)}
+          >
+            {touchedFields.repeatPassword && !repeatPassword && (
+              <div className="absolute w-full text-sm text-red-500 dark:text-red-500">Repeat Password is required</div>
+            )}
+          </TEInput>
+        </div>
         <button
           type="button"
           className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 disabled:opacity-50 disabled:pointer"
           disabled={!isButtonEnabled}
-          onClick={isSignUpMode ? signUp : signIn}
+          onClick={signUp}
         >
-          {isSignUpMode ? 'Sign Up' : 'Sign In'}
+          Sign Up
         </button>
         <p className="text-black dark:text-white mt-2">
-          {isSignUpMode ? 'Already have an account?' : "Don't have an account?"}
-          <span className="text-blue-500 cursor-pointer hover:underline" onClick={toggleMode}>
-            {isSignUpMode ? ' Sign In' : ' Sign Up'}
+          Already have an account?
+          <span className="text-blue-500 cursor-pointer hover:underline">
+            <Link to="/sign-in">Sign Up</Link>
           </span>
         </p>
       </div>
@@ -165,4 +117,4 @@ const SignInUp = () => {
   );
 };
 
-export default SignInUp;
+export default SignUp;

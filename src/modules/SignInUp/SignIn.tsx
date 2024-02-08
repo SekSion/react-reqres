@@ -1,28 +1,24 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { loginUser, registerUser } from '../../services/userSession';
+import { loginUser } from '../../services/userSession';
 import { ILogin } from '../../models/ILogin';
-import { IRegister } from '../../models/IRegister';
 import { useAuth } from '../../services/Contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { TEInput } from 'tw-elements-react';
-import { IUsers } from '../../models/IUsers';
 import { listUsers } from '../../services/users';
+import { IUsers } from '../../models/IUsers';
 
-const SignInUp = () => {
+const SignIn = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const [repeatPassword, setRepeatPassword] = useState<string>('');
-  const [isSignUpMode, setIsSignUpMode] = useState<boolean>(true);
   const [isButtonEnabled, setIsButtonEnabled] = useState<boolean>(false);
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({
     email: false,
     password: false,
-    repeatPassword: false,
   });
   const [emailError, setEmailError] = useState<string>('');
 
-  const { loginUserStore, isAuthenticated, registerUserStore } = useAuth();
+  const { loginUserStore, isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (isAuthenticated()) {
@@ -35,37 +31,9 @@ const SignInUp = () => {
   useEffect(() => {
     const isEmailValid = email !== '' && emailError === '';
     const isPasswordValid = password !== '';
-    const isRepeatPasswordValid = !isSignUpMode || repeatPassword !== '';
 
-    setIsButtonEnabled(isEmailValid && isPasswordValid && isRepeatPasswordValid);
-  }, [email, password, repeatPassword, isSignUpMode, emailError]);
-
-  const toggleMode = () => {
-    setIsSignUpMode(!isSignUpMode);
-    setRepeatPassword('');
-    setTouchedFields({
-      ...touchedFields,
-      repeatPassword: false,
-    });
-  };
-
-  const signUp = async () => {
-    const register: IRegister = {
-      email,
-      password,
-    };
-    await registerUser(register).then(
-      (res) => {
-        toast.success('id:' + res.id + ', ' + res.token);
-        registerUserStore(res.id, res.token);
-        toggleMode();
-      },
-      (err) => {
-        console.log(err);
-        toast.error(err);
-      },
-    );
-  };
+    setIsButtonEnabled(isEmailValid && isPasswordValid);
+  }, [email, password, emailError]);
 
   const signIn = async () => {
     const login: ILogin = {
@@ -111,15 +79,13 @@ const SignInUp = () => {
       setEmail(value);
     } else if (field === 'password') {
       setPassword(value);
-    } else if (field === 'repeatPassword') {
-      setRepeatPassword(value);
     }
   };
 
   return (
     <div className="min-h-[calc(100vh-60px)] flex items-center justify-center bg-gray-100 dark:bg-gray-800">
       <div className="bg-white dark:bg-gray-700 p-8 rounded shadow-md w-96">
-        <h2 className="text-2xl font-semibold mb-4 dark:text-white">{isSignUpMode ? 'Sign Up' : 'Sign In'}</h2>
+        <h2 className="text-2xl font-semibold mb-4 dark:text-white">Sign In</h2>
         <div className="mb-8 text-black dark:text-white">
           <TEInput type="email" id="email" label="Email" value={email} onChange={(e) => handleInputChange('email', e.target.value)}>
             {(touchedFields.email && !email && <div className="absolute w-full text-sm text-red-500 dark:text-red-500">Email is required</div>) ||
@@ -131,33 +97,18 @@ const SignInUp = () => {
             {touchedFields.password && !password && <div className="absolute w-full text-sm text-red-500 dark:text-red-500">Password is required</div>}
           </TEInput>
         </div>
-        {isSignUpMode && (
-          <div className="mb-8 text-black dark:text-white">
-            <TEInput
-              type="password"
-              id="repeatPassword"
-              label="Repeat Password"
-              value={repeatPassword}
-              onChange={(e) => handleInputChange('repeatPassword', e.target.value)}
-            >
-              {touchedFields.repeatPassword && !repeatPassword && (
-                <div className="absolute w-full text-sm text-red-500 dark:text-red-500">Repeat Password is required</div>
-              )}
-            </TEInput>
-          </div>
-        )}
         <button
           type="button"
           className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 disabled:opacity-50 disabled:pointer"
           disabled={!isButtonEnabled}
-          onClick={isSignUpMode ? signUp : signIn}
+          onClick={signIn}
         >
-          {isSignUpMode ? 'Sign Up' : 'Sign In'}
+          Sign In
         </button>
         <p className="text-black dark:text-white mt-2">
-          {isSignUpMode ? 'Already have an account?' : "Don't have an account?"}
-          <span className="text-blue-500 cursor-pointer hover:underline" onClick={toggleMode}>
-            {isSignUpMode ? ' Sign In' : ' Sign Up'}
+          Don't have an account?
+          <span className="text-blue-500 cursor-pointer hover:underline">
+            <Link to="/sign-up">Sign Up</Link>
           </span>
         </p>
       </div>
@@ -165,4 +116,4 @@ const SignInUp = () => {
   );
 };
 
-export default SignInUp;
+export default SignIn;

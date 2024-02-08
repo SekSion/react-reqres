@@ -1,14 +1,14 @@
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../services/Contexts/AuthContext";
-import toast from "react-hot-toast";
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../services/Contexts/AuthContext';
+import toast from 'react-hot-toast';
 
 const Logout = () => {
   const { logoutUser } = useAuth();
   const navigate = useNavigate();
   const logout = () => {
     logoutUser();
-    toast.success("logged out");
-    navigate("/");
+    toast.success('logged out');
+    navigate('/sign-in');
   };
 
   return (

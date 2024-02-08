@@ -12,14 +12,11 @@ const DarkModeButton = () => {
   }, [isDarkMode]);
 
   const toggleDarkMode = () => {
-    setIsDarkMode((prev:boolean) => !prev);
+    setIsDarkMode((prev: boolean) => !prev);
   };
 
   return (
-    <button
-      className="p-2 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white rounded-md"
-      onClick={toggleDarkMode}
-    >
+    <button className="p-2 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white rounded-md" onClick={toggleDarkMode}>
       {isDarkMode ? 'Light Mode' : 'Dark Mode'}
     </button>
   );
