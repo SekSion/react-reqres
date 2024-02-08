@@ -16,7 +16,7 @@ const DarkModeButton = () => {
   };
 
   return (
-    <button className="p-2 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white rounded-md" onClick={toggleDarkMode}>
+    <button className="themeswitcher p-2 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white rounded-md" onClick={toggleDarkMode}>
       {isDarkMode ? 'Light Mode' : 'Dark Mode'}
     </button>
   );

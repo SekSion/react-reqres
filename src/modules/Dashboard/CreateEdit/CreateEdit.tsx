@@ -146,7 +146,7 @@ export default function CreateEditModal(props: CreateEditModalProps): JSX.Elemen
             <TERipple rippleColor="light">
               <button
                 type="button"
-                className={`ml-1 inline-block rounded bg-primary px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out ${
+                className={` save-modal-btn ml-1 inline-block rounded bg-primary px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out ${
                   formValid ? 'hover:bg-primary-600 focus:bg-primary-600 active:bg-primary-700' : 'cursor-not-allowed bg-opacity-50'
                 }`}
                 onClick={saveUser}
@@ -155,7 +155,7 @@ export default function CreateEditModal(props: CreateEditModalProps): JSX.Elemen
                 {saving ? (
                   <>
                     <div
-                      className="inline-block h-3 w-3 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                      className=" inline-block h-3 w-3 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
                       role="status"
                     ></div>
                   </>

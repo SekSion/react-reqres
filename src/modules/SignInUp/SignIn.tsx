@@ -89,17 +89,19 @@ const SignIn = () => {
         <div className="mb-8 text-black dark:text-white">
           <TEInput type="email" id="email" label="Email" value={email} onChange={(e) => handleInputChange('email', e.target.value)}>
             {(touchedFields.email && !email && <div className="absolute w-full text-sm text-red-500 dark:text-red-500">Email is required</div>) ||
-              (emailError && <div className="absolute w-full text-sm text-red-500 dark:text-red-500">{emailError}</div>)}
+              (emailError && <div className=" email-error-message absolute w-full text-sm text-red-500 dark:text-red-500">{emailError}</div>)}
           </TEInput>
         </div>
         <div className="mb-8 text-black dark:text-white">
           <TEInput type="password" id="password" label="Password" value={password} onChange={(e) => handleInputChange('password', e.target.value)}>
-            {touchedFields.password && !password && <div className="absolute w-full text-sm text-red-500 dark:text-red-500">Password is required</div>}
+            {touchedFields.password && !password && (
+              <div className="password-error-message absolute w-full text-sm text-red-500 dark:text-red-500">Password is required</div>
+            )}
           </TEInput>
         </div>
         <button
           type="button"
-          className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 disabled:opacity-50 disabled:pointer"
+          className="sign-in-btn bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 disabled:opacity-50 disabled:pointer"
           disabled={!isButtonEnabled}
           onClick={signIn}
         >
@@ -108,7 +110,9 @@ const SignIn = () => {
         <p className="text-black dark:text-white mt-2">
           Don't have an account?
           <span className="text-blue-500 cursor-pointer hover:underline">
-            <Link to="/sign-up">Sign Up</Link>
+            <Link className="sign-up-link" to="/sign-up">
+              Sign Up
+            </Link>
           </span>
         </p>
       </div>

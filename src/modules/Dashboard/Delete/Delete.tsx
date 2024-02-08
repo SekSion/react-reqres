@@ -1,5 +1,5 @@
 import { TEModal, TEModalDialog, TEModalContent, TEModalHeader, TEModalBody, TEModalFooter, TERipple } from 'tw-elements-react';
-import { IListResponse, IUsers } from '../../../models/IUsers';
+import { IUsers } from '../../../models/IUsers';
 import { useState } from 'react';
 import { deleteUser } from '../../../services/users';
 import toast from 'react-hot-toast';

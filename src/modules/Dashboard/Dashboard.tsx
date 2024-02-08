@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../services/Contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { listUsers, updateUser } from '../../services/users';
+import { listUsers } from '../../services/users';
 import { IUsers } from '../../models/IUsers';
 import DeleteModal from './Delete/Delete';
 import CreateEditModal from './CreateEdit/CreateEdit';
@@ -20,7 +20,6 @@ function Dashboard() {
     if (!isAuthenticated()) {
       navigate('/');
     }
-    getUsers(currentPage);
   }, []);
 
   useEffect(() => {
@@ -56,6 +55,7 @@ function Dashboard() {
 
   const handleCreateBtn = () => {
     // Handle edit action here
+    setSelectedUser(null);
     setModalAction('create');
     setShowModal(true);
   };
@@ -72,29 +72,18 @@ function Dashboard() {
     setShowModal(true);
   };
 
-  const handleSaveModal = (u: IUsers) => {
-    switch (modalAction) {
-      case 'create':
-      case 'edit':
-        if (u && u.id) {
-          updateUser(u.id, u).then((res) => {
-            setUsers((prevUsers) => prevUsers.map((user) => (user.id === res.id ? (res as IUsers) : user)));
-          });
-        }
-        break;
-      case 'delete':
-    }
-  };
   return (
     <>
       <div className="min-h-[calc(100vh-60px)] flex bg-gray-100 dark:bg-gray-800 overflow-hidden flex-col items-center">
         <div className="w-full flex items-end justify-end pr-5 pt-5">
-          <button className="p-2 ml-4 min-w-[90px] bg-blue-600 dark:bg-blue-gray-900 text-white rounded-md" onClick={handleCreateBtn}>
+          <button className=" create-btn p-2 ml-4 min-w-[90px] bg-blue-600 dark:bg-blue-gray-900 text-white rounded-md" onClick={handleCreateBtn}>
             Create
           </button>
 
           <button
-            className={`p-2 ml-4 min-w-[90px] bg-blue-600 dark:bg-blue-gray-900 text-white rounded-md ${selectedUser ? '' : 'opacity-50 pointer-events-none'}`}
+            className={`edit-btn p-2 ml-4 min-w-[90px] bg-blue-600 dark:bg-blue-gray-900 text-white rounded-md ${
+              selectedUser ? '' : 'opacity-50 pointer-events-none'
+            }`}
             onClick={handleEditBtn}
             disabled={!selectedUser}
           >
@@ -102,7 +91,9 @@ function Dashboard() {
           </button>
 
           <button
-            className={`p-2 ml-4 min-w-[90px] bg-blue-600 dark:bg-blue-gray-900 text-white rounded-md ${selectedUser ? '' : 'opacity-50 pointer-events-none'}`}
+            className={`delete-btn p-2 ml-4 min-w-[90px] bg-blue-600 dark:bg-blue-gray-900 text-white rounded-md ${
+              selectedUser ? '' : 'opacity-50 pointer-events-none'
+            }`}
             onClick={handleDeleteBtn}
             disabled={!selectedUser}
           >
@@ -113,7 +104,7 @@ function Dashboard() {
           <div className="overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div className="inline-block min-w-full py-2 sm:px-6 lg:px-8">
               <div className="overflow-hidden">
-                <table className="min-w-full text-left text-sm font-light dark:text-white text-black">
+                <table className="list-users min-w-full text-left text-sm font-light dark:text-white text-black">
                   <thead className="border-b font-medium border-black dark:border-white">
                     <tr>
                       <th scope="col" className="px-6 py-4">
@@ -133,11 +124,11 @@ function Dashboard() {
                       </th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="list-users-body">
                     {users.map((user) => (
                       <tr
                         key={user.id}
-                        className={`hover:bg-gray-500 cursor-pointer border-b transition duration-300 ease-in-out hover:bg-neutral-100 border-black dark:border-white dark:hover:bg-neutral-600 ${
+                        className={`list-user-row hover:bg-gray-500 cursor-pointer border-b transition duration-300 ease-in-out hover:bg-neutral-100 border-black dark:border-white dark:hover:bg-neutral-600 ${
                           selectedUser?.id === user.id ? 'bg-blue-200' : ''
                         }`}
                         onClick={() => handleUserSelect(user)}

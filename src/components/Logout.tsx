@@ -12,7 +12,7 @@ const Logout = () => {
   };
 
   return (
-    <button className="p-2 ml-4 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white rounded-md" onClick={logout}>
+    <button className="logout-btn p-2 ml-4 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white rounded-md" onClick={logout}>
       Logout
     </button>
   );

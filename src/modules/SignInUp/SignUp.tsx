@@ -17,15 +17,24 @@ const SignUp = () => {
     repeatPassword: false,
   });
   const [emailError, setEmailError] = useState<string>('');
+  const [passwordMatchError, setPasswordMatchError] = useState<string>('');
 
-  const { registerUserStore } = useAuth();
+  const { registerUserStore, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated()) {
+      navigate('/dashboard');
+    }
+  }, []);
+
   useEffect(() => {
     const isEmailValid = email !== '' && emailError === '';
     const isPasswordValid = password !== '';
     const isRepeatPasswordValid = repeatPassword !== '';
+    const isPasswordMatch = repeatPassword === password;
 
-    setIsButtonEnabled(isEmailValid && isPasswordValid && isRepeatPasswordValid);
+    setIsButtonEnabled(isEmailValid && isPasswordValid && isRepeatPasswordValid && isPasswordMatch);
   }, [email, password, repeatPassword, emailError]);
 
   const signUp = async () => {
@@ -67,6 +76,16 @@ const SignUp = () => {
       setPassword(value);
     } else if (field === 'repeatPassword') {
       setRepeatPassword(value);
+      // Check if the repeat password is empty
+      if (value === '') {
+        setPasswordMatchError('Repeat Password is required');
+      }
+      // Check if the passwords match
+      else if (value !== password) {
+        setPasswordMatchError('Passwords do not match');
+      } else {
+        setPasswordMatchError('');
+      }
     }
   };
 
@@ -76,13 +95,17 @@ const SignUp = () => {
         <h2 className="text-2xl font-semibold mb-4 dark:text-white">Sign Up</h2>
         <div className="mb-8 text-black dark:text-white">
           <TEInput type="email" id="email" label="Email" value={email} onChange={(e) => handleInputChange('email', e.target.value)}>
-            {(touchedFields.email && !email && <div className="absolute w-full text-sm text-red-500 dark:text-red-500">Email is required</div>) ||
-              (emailError && <div className="absolute w-full text-sm text-red-500 dark:text-red-500">{emailError}</div>)}
+            {(touchedFields.email && !email && (
+              <div className="email-error-message absolute w-full text-sm text-red-500 dark:text-red-500">Email is required</div>
+            )) ||
+              (emailError && <div className="email-error-message absolute w-full text-sm text-red-500 dark:text-red-500">{emailError}</div>)}
           </TEInput>
         </div>
         <div className="mb-8 text-black dark:text-white">
           <TEInput type="password" id="password" label="Password" value={password} onChange={(e) => handleInputChange('password', e.target.value)}>
-            {touchedFields.password && !password && <div className="absolute w-full text-sm text-red-500 dark:text-red-500">Password is required</div>}
+            {touchedFields.password && !password && (
+              <div className=" password-error-message absolute w-full text-sm text-red-500 dark:text-red-500">Password is required</div>
+            )}
           </TEInput>
         </div>
         <div className="mb-8 text-black dark:text-white">
@@ -96,11 +119,14 @@ const SignUp = () => {
             {touchedFields.repeatPassword && !repeatPassword && (
               <div className="absolute w-full text-sm text-red-500 dark:text-red-500">Repeat Password is required</div>
             )}
+            {passwordMatchError && (
+              <div className="repeat-password-error-message absolute w-full text-sm text-red-500 dark:text-red-500">{passwordMatchError}</div>
+            )}
           </TEInput>
         </div>
         <button
           type="button"
-          className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 disabled:opacity-50 disabled:pointer"
+          className="sign-up-btn bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 disabled:opacity-50 disabled:pointer"
           disabled={!isButtonEnabled}
           onClick={signUp}
         >
@@ -109,7 +135,9 @@ const SignUp = () => {
         <p className="text-black dark:text-white mt-2">
           Already have an account?
           <span className="text-blue-500 cursor-pointer hover:underline">
-            <Link to="/sign-in">Sign Up</Link>
+            <Link className="sign-in-link" to="/sign-in">
+              Sign In
+            </Link>
           </span>
         </p>
       </div>

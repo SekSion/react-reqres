@@ -1,9 +1,7 @@
 // Import necessary modules
-import React from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom'; // Import Routes and Route
 import './App.css';
 import DarkModeButton from './components/ThemeSwitcher';
-import SignInUp from './modules/SignInUp/SignInUp';
 import SignUp from './modules/SignInUp/SignUp';
 import Dashboard from './modules/Dashboard/Dashboard';
 import { ThemeProvider } from '@material-tailwind/react';
