@@ -9,12 +9,13 @@
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
+    "cy:open": "npx cypress open",
     "cy:open-e2e": "cypress open --e2e --browser edge",
     "cy:open-unit": "cypress open --component --browser edge",
     "cy:run-e2e": "cypress run --e2e",
     "cy:e2e": "start-server-and-test dev http-get://localhost:5173 cy:open-e2e",
     "build-docker": "docker build -t reqres-test .",
-    "run-docker": "docker run -p 3000:3000 reqres-test"
+    "run-docker": "docker run -p 5173:5173 reqres-test"
   },
   "dependencies": {
     "@heroicons/react": "^2.1.1",
