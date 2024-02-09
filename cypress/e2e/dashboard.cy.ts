@@ -25,6 +25,7 @@ describe('Rendering Dashboard', () => {
       });
 
       it('check if table is rendered with 6 rows and buttons disableness are correct before and after selecting user', () => {
+        cy.intercept('GET', '/api/users?page=1').as('getUsers');
         cy.visit('/dashboard');
         cy.get('.create-btn').should('be.enabled');
         cy.get('.edit-btn').should('be.disabled');
@@ -35,25 +36,86 @@ describe('Rendering Dashboard', () => {
         cy.get('.create-btn').should('be.enabled');
         cy.get('.edit-btn').should('be.enabled');
         cy.get('.delete-btn').should('be.enabled');
+        cy.wait('@getUsers').then(interception => {
+            expect(interception?.response?.statusCode).to.equal(200);
+        });
       });
 
-      it.only('open Create Modal and fill and check if table now has 7 rows', () => {
+      it('open Create Modal and fill and check if table now has 7 rows', () => {
+        cy.intercept('POST', '/api/users').as('createUser');
         cy.visit('/dashboard');
         cy.get('.list-users').should('exist');
         cy.get('.list-user-row').should('have.length', 6);
         cy.get('.list-user-row').first().click();
         cy.get('.create-btn').click();
-        cy.get('#first_name').type("teste")
-        cy.get('#last_name').type("teste")
-        cy.get('#email').type("teste")
+        cy.get('#first_name').type('teste');
+        cy.get('#last_name').type('teste');
+        cy.get('#email').type('teste');
         cy.get('.relative > .text-sm').contains('Invalid email format');
-        cy.get('.save-modal-btn').should("be.disabled");
-        cy.get('#email').clear().type("teste@test.com");
+        cy.get('.save-modal-btn').should('be.disabled');
+        cy.get('#email').clear().type('teste@test.com');
+        cy.get('.save-modal-btn').should('be.enabled');
+        cy.intercept('POST', '/api/users').as('createUser');
+        cy.get('.save-modal-btn').click();
+        cy.wait('@createUser').then(interception => {
+            expect(interception?.response?.statusCode).to.equal(201);
+        });
+        cy.get('.list-user-row').should('have.length', 7);
+    });
+
+      it('open Edit Modal and fill and check if table now has the changed data', () => {
+        cy.intercept('PUT', '/api/users/1').as('updateUser');
+        cy.visit('/dashboard');
+        cy.wait(2000);
+        cy.get('.list-user-row').first().click();
+        cy.get('.edit-btn').should('be.enabled');
+        cy.get('.edit-btn').click();
+        cy.get('#first_name').clear().type("teste")
+        cy.get('#last_name').clear().type("teste")
+        cy.get('#email').clear().type("teste@email.com")
         cy.get('.save-modal-btn').should("be.enabled");
         cy.get('.save-modal-btn').click();
-        cy.wait(2000);
-        cy.get('.list-user-row').should('have.length', 7);
+        cy.wait('@updateUser').then(interception => {
+            expect(interception?.response?.statusCode).to.equal(200);
+        });
+        cy.get(':nth-child(1) > .user-first-name').should("contain", "teste");
+        cy.get(':nth-child(1) > .user-last-name').should("contain", "teste");
+        cy.get(':nth-child(1) > .user-email').should("contain", "teste@email.com");
       });
-      
+
+      it('open Delete Modal', () => {
+        cy.intercept('DELETE', '/api/users/1').as('deleteUser');
+        cy.visit('/dashboard');
+        cy.wait(2000);
+        cy.get('.list-user-row').first().click();
+        cy.get('.delete-btn').should('be.enabled');
+        cy.get('.delete-btn').click();
+        cy.get('.delete-modal-btn').should("be.enabled");
+        cy.get('.delete-modal-btn').click();
+        cy.wait('@deleteUser').then(interception => {
+            expect(interception?.response?.statusCode).to.equal(204);
+        });
+        cy.get('.list-user-row').should('have.length', 5);
+      });
+
+      it('pagination', () => {
+        cy.intercept('GET', '/api/users?page=2').as('getPageSecond');
+        cy.intercept('GET', '/api/users?page=1').as('getPageFirst');
+        cy.visit('/dashboard');
+        cy.get('.page-number-2').click();
+       
+        cy.wait('@getPageSecond').then(interception => {
+            expect(interception?.response?.statusCode).to.equal(200);
+        });
+        cy.get('.list-users').should('exist');
+        cy.get('.list-user-row').should('have.length', 6);
+        cy.get('.page-number-1').click();
+       
+        cy.wait('@getPageFirst').then(interception => {
+            expect(interception?.response?.statusCode).to.equal(200);
+        });
+        cy.get('.list-users').should('exist');
+        cy.get('.list-user-row').should('have.length', 6);
+      });
   });
   

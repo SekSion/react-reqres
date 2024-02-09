@@ -1,4 +1,4 @@
-# Use the official Node.js 14 image as base
+# Use an official Node.js runtime as a parent image
 FROM node:20
 
 # Set the working directory in the container
@@ -7,20 +7,14 @@ WORKDIR /src
 # Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
 
-# Install dependencies
+# Install app dependencies
 RUN npm install
 
-# Copy the rest of the application code to the working directory
+# Copy the rest of your application code to the working directory
 COPY . .
 
-# Build your Vite project
-RUN npm run build
+# Expose a port to communicate with the React app
+EXPOSE 5173
 
-# Install serve package globally
-RUN npm install -g serve
-
-# Expose the port your app runs on
-EXPOSE 3000
-
-# Command to run the application
-CMD ["serve", "-s", "build"]
+# Start your React app
+CMD ["npm", "run", "dev"]

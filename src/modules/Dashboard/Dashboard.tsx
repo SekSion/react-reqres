@@ -20,6 +20,7 @@ function Dashboard() {
     if (!isAuthenticated()) {
       navigate('/');
     }
+    getUsers(currentPage);
   }, []);
 
   useEffect(() => {
@@ -76,7 +77,7 @@ function Dashboard() {
     <>
       <div className="min-h-[calc(100vh-60px)] flex bg-gray-100 dark:bg-gray-800 overflow-hidden flex-col items-center">
         <div className="w-full flex items-end justify-end pr-5 pt-5">
-          <button className=" create-btn p-2 ml-4 min-w-[90px] bg-blue-600 dark:bg-blue-gray-900 text-white rounded-md" onClick={handleCreateBtn}>
+          <button className="create-btn p-2 ml-4 min-w-[90px] bg-blue-600 dark:bg-blue-gray-900 text-white rounded-md" onClick={handleCreateBtn}>
             Create
           </button>
 
@@ -133,13 +134,13 @@ function Dashboard() {
                         }`}
                         onClick={() => handleUserSelect(user)}
                       >
-                        <td className="whitespace-nowrap px-6 py-4 font-medium">{user.id}</td>
-                        <td className="whitespace-nowrap px-6 py-4 font-medium">
+                        <td className="user-id whitespace-nowrap px-6 py-4 font-medium">{user.id}</td>
+                        <td className=" user-avatar whitespace-nowrap px-6 py-4 font-medium">
                           <img className="max-w-[60px] rounded-full" src={user.avatar} />
                         </td>
-                        <td className="whitespace-nowrap px-6 py-4">{user.first_name}</td>
-                        <td className="whitespace-nowrap px-6 py-4">{user.last_name}</td>
-                        <td className="whitespace-nowrap px-6 py-4">{user.email}</td>
+                        <td className=" user-first-name whitespace-nowrap px-6 py-4">{user.first_name}</td>
+                        <td className="user-last-name whitespace-nowrap px-6 py-4">{user.last_name}</td>
+                        <td className="user-email whitespace-nowrap px-6 py-4">{user.email}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -153,7 +154,7 @@ function Dashboard() {
             <li>
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
-                className={`relative block rounded bg-transparent px-3 py-1.5 text-sm text-neutral-600 transition-all duration-500 hover:bg-neutral-100 dark:text-white dark:hover:text-blue-600  hover:text-blue-600 ${
+                className={` relative block rounded bg-transparent px-3 py-1.5 text-sm text-neutral-600 transition-all duration-500 hover:bg-neutral-100 dark:text-white dark:hover:text-blue-600  hover:text-blue-600 ${
                   currentPage === 1 ? 'opacity-50 pointer-events-none' : ''
                 }`}
                 disabled={currentPage === 1}
@@ -165,7 +166,9 @@ function Dashboard() {
               <li key={page + 1}>
                 <button
                   onClick={() => handlePageChange(page + 1)}
-                  className={`relative block font-bold rounded bg-transparent px-3 py-1.5 text-sm text-neutral-600 transition-all duration-500 hover:bg-neutral-100 dark:text-white dark:hover:text-blue-600 hover:text-blue-600 ${
+                  className={`page-number-${
+                    page + 1
+                  } relative block font-bold rounded bg-transparent px-3 py-1.5 text-sm text-neutral-600 transition-all duration-500 hover:bg-neutral-100 dark:text-white dark:hover:text-blue-600 hover:text-blue-600 ${
                     currentPage === page + 1 ? 'font-bold text-blue-700 dark:text-blue-700' : ''
                   }`}
                 >
